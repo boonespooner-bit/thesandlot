@@ -1,0 +1,39 @@
+# Render Blueprint — deploy The Sandlot with one click.
+# In the Render dashboard: New + → Blueprint → connect this repo → Apply.
+
+databases:
+  - name: sandlot-db
+    plan: free
+    databaseName: sandlot
+    user: sandlot
+
+services:
+  - type: web
+    name: thesandlot
+    runtime: node
+    plan: free
+    buildCommand: npm ci && npx prisma migrate deploy && npm run build
+    startCommand: npm run start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: sandlot-db
+          property: connectionString
+      - key: SESSION_SECRET
+        generateValue: true
+      # Optional — set these in the dashboard to send real email.
+      # Without SMTP_HOST, emails are logged to the server console and
+      # recorded in the EmailLog table instead of being delivered.
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: SMTP_FROM
+        sync: false

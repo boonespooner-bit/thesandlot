@@ -41,19 +41,52 @@ inning — follows the model of
 
 - [Next.js 15](https://nextjs.org) (App Router, server actions) + React 19
 - [Tailwind CSS 4](https://tailwindcss.com)
-- [Prisma 6](https://prisma.io) with SQLite (swap `datasource` provider +
-  `DATABASE_URL` for PostgreSQL in production)
+- [Prisma 6](https://prisma.io) with PostgreSQL
 - Auth: bcrypt password hashing + JWT session cookie (`jose`)
 - Email: `nodemailer` (SMTP optional)
+- Hosting: [Render](https://render.com) via `render.yaml` blueprint
 
-## Getting started
+## Getting started (local)
+
+You need a PostgreSQL database. The quickest way is Docker:
 
 ```bash
-npm install
-npm run db:push     # create the SQLite database
-npm run db:seed     # optional: demo data
-npm run dev         # http://localhost:3000
+docker run -d --name sandlot-pg \
+  -e POSTGRES_PASSWORD=sandlot -e POSTGRES_DB=sandlot \
+  -p 5432:5432 postgres:16
 ```
+
+Then:
+
+```bash
+cp .env.example .env   # adjust DATABASE_URL if needed
+npm install
+npm run db:push        # create the tables
+npm run db:seed        # optional: demo data
+npm run dev            # http://localhost:3000
+```
+
+## Deploying to Render
+
+The repo ships a [`render.yaml`](render.yaml) blueprint that provisions a
+free PostgreSQL database and the web service together:
+
+1. Push this repo to GitHub.
+2. In the [Render dashboard](https://dashboard.render.com): **New + →
+   Blueprint**, connect the repo, and click **Apply**.
+3. Render creates `sandlot-db` (PostgreSQL) and `thesandlot` (web service),
+   wires `DATABASE_URL` between them, and generates a random
+   `SESSION_SECRET`. Each deploy runs `prisma migrate deploy` before the
+   build, so the schema is always up to date.
+4. Once live, open the app and **register — the first account becomes the
+   manager**.
+5. Optional: set the `SMTP_*` environment variables on the web service to
+   send real email; until then emails are logged to the service console and
+   the `EmailLog` table.
+
+Note: Render's free Postgres instances expire after 30 days unless upgraded,
+and free web services spin down when idle (first request after a quiet spell
+takes ~30s).
 
 ### Seeded logins (password: `sandlot123`)
 
