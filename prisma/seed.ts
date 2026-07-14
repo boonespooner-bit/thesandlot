@@ -112,8 +112,8 @@ async function main() {
         notes: "Bring water and gloves. Legends never die.",
         teams: {
           create: [
-            { side: "HOME", name: "Sandlot Sluggers" },
-            { side: "AWAY", name: "Backyard Bombers" },
+            { side: "HOME", name: "Light Shirts" },
+            { side: "AWAY", name: "Dark Shirts" },
           ],
         },
       },
@@ -180,8 +180,8 @@ async function main() {
         createdById: manager.id,
         teams: {
           create: [
-            { side: "HOME", name: "Dirt Dogs" },
-            { side: "AWAY", name: "The Heaters" },
+            { side: "HOME", name: "Light Shirts" },
+            { side: "AWAY", name: "Dark Shirts" },
           ],
         },
       },

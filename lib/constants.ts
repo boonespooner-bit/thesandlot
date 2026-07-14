@@ -57,9 +57,10 @@ export function activePositionsFor(teamSize: number): Position[] {
   return POSITION_PRIORITY.slice(0, n);
 }
 
+// Home wears light shirts, away wears dark shirts.
 export const DEFAULT_TEAM_NAMES: Record<string, string> = {
-  HOME: "Sandlot Sluggers",
-  AWAY: "Backyard Bombers",
+  HOME: "Light Shirts",
+  AWAY: "Dark Shirts",
 };
 
 export const VOLUNTEER_ROLES = ["UMPIRE", "PITCHER"] as const;
