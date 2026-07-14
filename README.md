@@ -92,27 +92,34 @@ takes ~30s).
 
 | Account | Role |
 | --- | --- |
+| `owner@thesandlot.local` | Owner — full control incl. user roles |
 | `manager@thesandlot.local` | Manager — schedules games |
 | `melissa@example.com`, `ray@example.com`, … | Parents with kids |
 
 **The first account registered in an empty database automatically becomes the
-manager.** Everyone who registers after that is a parent.
+owner (super admin).** Everyone who registers after that is a parent; the
+owner promotes managers or co-owners from the `/admin` console. As a recovery
+hatch, set the `ADMIN_EMAIL` environment variable — the account with that
+email is granted the owner role on registration or next login.
 
 ## Environment variables (`.env`)
 
 | Variable | Purpose |
 | --- | --- |
-| `DATABASE_URL` | Prisma connection string (default `file:./dev.db`) |
+| `DATABASE_URL` | PostgreSQL connection string |
 | `SESSION_SECRET` | Secret for signing session JWTs — change in production |
+| `ADMIN_EMAIL` | Optional — this account is always granted the owner role |
 | `SMTP_HOST` / `SMTP_PORT` / `SMTP_SECURE` / `SMTP_USER` / `SMTP_PASS` / `SMTP_FROM` | Optional — real email delivery. Without `SMTP_HOST`, emails are logged to the console. |
 
 ## Roles & permissions
 
-| Ability | Parent | Coach (per game) | Manager |
-| --- | --- | --- | --- |
-| Add/manage own kids | ✅ | ✅ | ✅ |
-| Sign up own kids for a game | ✅ | ✅ | ✅ |
-| Volunteer to coach a team | ✅ | — | ✅ |
-| Add ump/pitcher volunteers | ✅ | ✅ | ✅ |
-| Build teams / set lineups | — | ✅ (their game) | ✅ |
-| Schedule / cancel games | — | — | ✅ |
+| Ability | Parent | Coach (per game) | Manager | Owner |
+| --- | --- | --- | --- | --- |
+| Add/manage own kids | ✅ | ✅ | ✅ | ✅ |
+| Sign up own kids for a game | ✅ | ✅ | ✅ | ✅ |
+| Volunteer to coach a team | ✅ | — | ✅ | ✅ |
+| Add ump/pitcher volunteers | ✅ | ✅ | ✅ | ✅ |
+| Build teams / set lineups | — | ✅ (their game) | ✅ | ✅ |
+| Schedule / cancel games | — | — | ✅ | ✅ |
+| Promote/demote managers & owners | — | — | — | ✅ |
+| Delete games, audit email log (`/admin`) | — | — | — | ✅ |

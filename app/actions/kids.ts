@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
+import { isStaff } from "@/lib/constants";
 
 export type FormState = { error?: string } | undefined;
 
@@ -73,7 +74,7 @@ export async function removeKid(kidId: string) {
   const link = await prisma.parentKid.findUnique({
     where: { parentId_kidId: { parentId: user.id, kidId } },
   });
-  if (!link && user.role !== "MANAGER") return;
+  if (!link && !isStaff(user.role)) return;
 
   await prisma.kid.delete({ where: { id: kidId } });
   revalidatePath("/kids");

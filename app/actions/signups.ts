@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { sendEmail, sendMany } from "@/lib/email";
-import { MIN_PLAYERS_TOTAL } from "@/lib/constants";
+import { isStaff, MIN_PLAYERS_TOTAL } from "@/lib/constants";
 import { formatGameDate, formatTime, kidName } from "@/lib/format";
 
 export type FormState = { error?: string; ok?: string } | undefined;
@@ -118,7 +118,7 @@ export async function withdrawSignup(signupId: string) {
   if (!signup) return;
 
   const isParent = signup.kid.parents.some((p) => p.parentId === user.id);
-  if (!isParent && user.role !== "MANAGER") return;
+  if (!isParent && !isStaff(user.role)) return;
 
   // Also pull the kid off any team roster / lineup for this game.
   const teams = await prisma.team.findMany({ where: { gameId: signup.gameId } });

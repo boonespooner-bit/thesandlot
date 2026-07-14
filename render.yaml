@@ -24,6 +24,10 @@ services:
           property: connectionString
       - key: SESSION_SECRET
         generateValue: true
+      # Optional — the account with this email is always granted the owner
+      # (super admin) role, on registration or next login.
+      - key: ADMIN_EMAIL
+        sync: false
       # Optional — set these in the dashboard to send real email.
       # Without SMTP_HOST, emails are logged to the server console and
       # recorded in the EmailLog table instead of being delivered.

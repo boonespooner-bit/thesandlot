@@ -11,6 +11,7 @@ import {
 import { withdrawSignup } from "@/app/actions/signups";
 import { cancelGame, removeVolunteer, withdrawAsCoach } from "@/app/actions/games";
 import {
+  isStaff,
   MAX_COACHES_PER_TEAM,
   MAX_VOLUNTEERS_PER_GAME,
   MIN_PLAYERS_TOTAL,
@@ -55,7 +56,7 @@ export default async function GamePage({
   const signedUpKidIds = new Set(game.signups.map((s) => s.kidId));
   const playerCount = game.signups.length;
   const pct = Math.min(100, Math.round((playerCount / MIN_PLAYERS_TOTAL) * 100));
-  const isManager = user?.role === "MANAGER";
+  const isManager = !!user && isStaff(user.role);
   const isCoach = !!user && game.teams.some((t) =>
     t.coaches.some((c) => c.userId === user.id)
   );

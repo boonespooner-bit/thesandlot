@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { GameCard } from "@/components/GameCard";
+import { isStaff } from "@/lib/constants";
 
 export default async function GamesPage() {
   const user = await getCurrentUser();
@@ -25,7 +26,7 @@ export default async function GamesPage() {
     <div className="space-y-10">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-3xl font-black">Games</h1>
-        {user?.role === "MANAGER" && (
+        {user && isStaff(user.role) && (
           <Link
             href="/games/new"
             className="rounded-full bg-field px-4 py-2 font-bold text-chalk hover:bg-field-dark"

@@ -5,6 +5,7 @@ import { GameCard } from "@/components/GameCard";
 import { GameStatusBadge } from "@/components/GameStatusBadge";
 import { withdrawSignup } from "@/app/actions/signups";
 import { formatShortDate, formatTime, kidName } from "@/lib/format";
+import { isStaff } from "@/lib/constants";
 
 export default async function DashboardPage() {
   const user = await requireUser();
@@ -39,7 +40,7 @@ export default async function DashboardPage() {
     <div className="space-y-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-3xl font-black">Hey, {user.name.split(" ")[0]}!</h1>
-        {user.role === "MANAGER" && (
+        {isStaff(user.role) && (
           <Link
             href="/games/new"
             className="rounded-full bg-field px-4 py-2 font-bold text-chalk hover:bg-field-dark"

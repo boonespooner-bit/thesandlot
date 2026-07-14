@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { SignJWT, jwtVerify } from "jose";
 import { prisma } from "@/lib/db";
+import { isAdmin, isStaff } from "@/lib/constants";
 
 const SESSION_COOKIE = "sandlot_session";
 const SESSION_DAYS = 30;
@@ -60,9 +61,16 @@ export async function requireUser() {
   return user;
 }
 
-/** Redirects unless the signed-in user is a manager. */
+/** Redirects unless the signed-in user is staff (manager or owner). */
 export async function requireManager() {
   const user = await requireUser();
-  if (user.role !== "MANAGER") redirect("/dashboard");
+  if (!isStaff(user.role)) redirect("/dashboard");
+  return user;
+}
+
+/** Redirects unless the signed-in user is the owner (ADMIN). */
+export async function requireAdmin() {
+  const user = await requireUser();
+  if (!isAdmin(user.role)) redirect("/dashboard");
   return user;
 }

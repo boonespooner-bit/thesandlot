@@ -7,11 +7,12 @@ import {
   BENCH,
   INNINGS,
   activePositionsFor,
+  isStaff,
 } from "@/lib/constants";
 
 async function requireLineupEditor(gameId: string) {
   const user = await requireUser();
-  if (user.role === "MANAGER") return user;
+  if (isStaff(user.role)) return user;
   const coach = await prisma.gameCoach.findUnique({
     where: { gameId_userId: { gameId, userId: user.id } },
   });

@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { LineupEditor } from "@/components/LineupEditor";
-import { activePositionsFor, MIN_PLAYERS_PER_TEAM } from "@/lib/constants";
+import { activePositionsFor, isStaff, MIN_PLAYERS_PER_TEAM } from "@/lib/constants";
 import { formatGameDate } from "@/lib/format";
 
 export default async function LineupPage({
@@ -26,7 +26,7 @@ export default async function LineupPage({
   if (!team || team.gameId !== id) notFound();
 
   const isCoach = team.game.coaches.some((c) => c.userId === user.id);
-  if (user.role !== "MANAGER" && !isCoach) redirect(`/games/${id}`);
+  if (!isStaff(user.role) && !isCoach) redirect(`/games/${id}`);
 
   const players = team.players.map((p) => p.kid);
   const activePositions = activePositionsFor(players.length);

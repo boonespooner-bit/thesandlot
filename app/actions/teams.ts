@@ -3,11 +3,12 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
+import { isStaff } from "@/lib/constants";
 
 // Team building is open to the game's coaches and to managers.
 async function requireTeamEditor(gameId: string) {
   const user = await requireUser();
-  if (user.role === "MANAGER") return user;
+  if (isStaff(user.role)) return user;
   const coach = await prisma.gameCoach.findUnique({
     where: { gameId_userId: { gameId, userId: user.id } },
   });

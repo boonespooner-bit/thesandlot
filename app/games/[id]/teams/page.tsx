@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { TeamBuilder } from "@/components/TeamBuilder";
-import { MIN_PLAYERS_PER_TEAM } from "@/lib/constants";
+import { isStaff, MIN_PLAYERS_PER_TEAM } from "@/lib/constants";
 import { formatGameDate, kidName } from "@/lib/format";
 
 export default async function TeamsPage({
@@ -29,7 +29,7 @@ export default async function TeamsPage({
   const isCoach = game.teams.some((t) =>
     t.coaches.some((c) => c.userId === user.id)
   );
-  if (user.role !== "MANAGER" && !isCoach) redirect(`/games/${id}`);
+  if (!isStaff(user.role) && !isCoach) redirect(`/games/${id}`);
 
   return (
     <div className="space-y-6">

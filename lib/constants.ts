@@ -64,6 +64,22 @@ export const DEFAULT_TEAM_NAMES: Record<string, string> = {
 
 export const VOLUNTEER_ROLES = ["UMPIRE", "PITCHER"] as const;
 
+// Role hierarchy: ADMIN (owner) > MANAGER > PARENT.
+// Staff (managers and the owner) can schedule games, build teams and lineups.
+export function isStaff(role: string) {
+  return role === "MANAGER" || role === "ADMIN";
+}
+
+export function isAdmin(role: string) {
+  return role === "ADMIN";
+}
+
+export const ROLE_LABELS: Record<string, string> = {
+  PARENT: "Parent",
+  MANAGER: "Manager",
+  ADMIN: "Owner",
+};
+
 export const GAME_STATUS_LABELS: Record<string, string> = {
   OPEN: "Open for signups",
   CONFIRMED: "Game on!",

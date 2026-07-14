@@ -27,6 +27,18 @@ function utcDateDaysFromNow(days: number) {
 async function main() {
   const passwordHash = await bcrypt.hash(PASSWORD, 10);
 
+  const owner = await prisma.user.upsert({
+    where: { email: "owner@thesandlot.local" },
+    update: {},
+    create: {
+      email: "owner@thesandlot.local",
+      name: "The Commissioner",
+      passwordHash,
+      role: "ADMIN",
+    },
+  });
+  void owner;
+
   const manager = await prisma.user.upsert({
     where: { email: "manager@thesandlot.local" },
     update: {},
@@ -187,6 +199,7 @@ async function main() {
   }
 
   console.log("Seeded.");
+  console.log(`Owner login:    owner@thesandlot.local / ${PASSWORD}`);
   console.log(`Manager login:  manager@thesandlot.local / ${PASSWORD}`);
   console.log(`Parent logins:  melissa@example.com (etc.) / ${PASSWORD}`);
 }
