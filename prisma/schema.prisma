@@ -1,0 +1,172 @@
+// The Sandlot — pickup baseball signup & game management
+// Kids are the players; parents sign them up. Teams are rebuilt per game.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  phone        String?
+  role         String   @default("PARENT") // PARENT | MANAGER
+  createdAt    DateTime @default(now())
+
+  kids         ParentKid[]
+  signups      Signup[]
+  coachSpots   GameCoach[]
+  gamesCreated Game[]      @relation("GameCreator")
+}
+
+// The persistent roster of kids. Kids stay in the system across games.
+model Kid {
+  id        String   @id @default(cuid())
+  firstName String
+  lastName  String
+  birthYear Int?
+  notes     String?
+  createdAt DateTime @default(now())
+
+  parents     ParentKid[]
+  signups     Signup[]
+  assignments InningAssignment[]
+  teamSpots   TeamPlayer[]
+}
+
+// Links kids to their parents (a kid can have up to two linked parents).
+model ParentKid {
+  parentId String
+  kidId    String
+  relation String? // "mom", "dad", "guardian" ...
+
+  parent User @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  kid    Kid  @relation(fields: [kidId], references: [id], onDelete: Cascade)
+
+  @@id([parentId, kidId])
+}
+
+model Location {
+  id      String @id @default(cuid())
+  name    String
+  address String?
+  games   Game[]
+}
+
+// One game per date. Teams, coaches and volunteers all hang off the game.
+model Game {
+  id          String     @id @default(cuid())
+  date        DateTime   @unique // the calendar day of the game (midnight UTC)
+  startTime   String // "17:30" — display time at the field
+  status      String     @default("OPEN") // OPEN | CONFIRMED | CANCELLED | COMPLETED
+  notes       String?
+  createdAt   DateTime   @default(now())
+  confirmedAt DateTime?
+
+  locationId String
+  location   Location @relation(fields: [locationId], references: [id])
+
+  createdById String
+  createdBy   User   @relation("GameCreator", fields: [createdById], references: [id])
+
+  signups     Signup[]
+  teams       Team[]
+  coaches     GameCoach[]
+  volunteers  GameVolunteer[]
+}
+
+// A parent signing a kid up to play in a specific game.
+model Signup {
+  id        String   @id @default(cuid())
+  gameId    String
+  kidId     String
+  parentId  String
+  createdAt DateTime @default(now())
+
+  game   Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  kid    Kid  @relation(fields: [kidId], references: [id], onDelete: Cascade)
+  parent User @relation(fields: [parentId], references: [id])
+
+  @@unique([gameId, kidId])
+}
+
+// Teams exist only for one game and are rebuilt every game.
+model Team {
+  id     String    @id @default(cuid())
+  gameId String
+  side   String // HOME | AWAY
+  name   String // fun sandlot name, editable
+
+  game        Game               @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  players     TeamPlayer[]
+  coaches     GameCoach[]
+  assignments InningAssignment[]
+
+  @@unique([gameId, side])
+}
+
+model TeamPlayer {
+  teamId String
+  kidId  String
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  kid  Kid  @relation(fields: [kidId], references: [id], onDelete: Cascade)
+
+  @@id([teamId, kidId])
+}
+
+// A parent volunteering to coach one team for one game. Max 2 per team.
+model GameCoach {
+  id     String @id @default(cuid())
+  gameId String
+  teamId String
+  userId String
+
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([gameId, userId]) // a parent coaches at most one team per game
+}
+
+// High-school helpers: volunteer umpires / pitchers. Max 2 per game.
+model GameVolunteer {
+  id     String        @id @default(cuid())
+  gameId String
+  name   String
+  role   String // UMPIRE | PITCHER
+  phone  String?
+
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+}
+
+// Which kid plays which position in which inning (1-6) for a team.
+// Position codes: P C 1B 2B 3B SS LF CF RF BENCH
+model InningAssignment {
+  id       String @id @default(cuid())
+  teamId   String
+  kidId    String
+  inning   Int
+  position String
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  kid  Kid  @relation(fields: [kidId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, kidId, inning])
+}
+
+// Outbound email record — every email sent (or logged in dev) lands here.
+model EmailLog {
+  id        String   @id @default(cuid())
+  to        String
+  subject   String
+  body      String
+  sentAt    DateTime @default(now())
+  delivered Boolean  @default(false)
+}
